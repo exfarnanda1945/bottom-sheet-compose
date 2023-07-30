@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">Bottom Sheet Compose</string>
+    <string name="jetpack_compose_logo">Jetpack Compose Logo</string>
 </resources>
