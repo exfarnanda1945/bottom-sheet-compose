@@ -1,71 +1,53 @@
 package com.example.bottomsheetcompose
 
-import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.ListItem
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ModalBottomSheet
-import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.SheetState
 import androidx.compose.material3.Text
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun BottomSheet(
-    onClose: (openSheetState: Boolean) -> Unit,
-    sheetState: SheetState,
-    scope: CoroutineScope,
-    modifier: Modifier = Modifier
+    scope:CoroutineScope,
+    modifier:Modifier = Modifier
 ) {
-    ModalBottomSheet(
-        onDismissRequest = { onClose(false) },
-        sheetState = sheetState,
+    var openBottomSheet by rememberSaveable { mutableStateOf(false) }
+
+    // if skipPartiallyExpanded false, the bottom sheet will show half a screen
+    // if true, the bottom sheet will automatically show fullscreen
+    val bottomSheetState = rememberModalBottomSheetState(
+        skipPartiallyExpanded = false,
+    )
+
+    Box(
+        modifier = modifier
+            .fillMaxSize()
+            .padding(18.dp), contentAlignment = Alignment.Center
     ) {
-        Column(
-            modifier
-                .fillMaxWidth()
-                .padding(vertical = 18.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            OutlinedButton(
-                onClick = {
-                    scope.launch {
-                        sheetState.hide()
-                    }.invokeOnCompletion {
-                        // invokeOnCompletion -> invoke after launch completed
-                        onClose(false)
-                    }
-                },
-                border = BorderStroke(width = 1.dp, color = MaterialTheme.colorScheme.primary)
-            ) {
-                Text(text = "Close Bottom Sheet")
+        Column(modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
+            Button(onClick = { openBottomSheet = !openBottomSheet }) {
+                Text(text = "Open Bottom Sheet")
             }
-            LazyColumn {
-                items(50) {
-                    ListItem(
-                        headlineContent = { Text("Item $it") },
-                        leadingContent = {
-                            Icon(
-                                Icons.Default.Favorite,
-                                contentDescription = "Localized description"
-                            )
-                        }
-                    )
-                }
-            }
-        }
         }
     }
+
+    if (openBottomSheet) {
+        BottomSheetContent(onClose = {
+            openBottomSheet = it
+        }, sheetState = bottomSheetState, scope = scope)
+    }
+}
